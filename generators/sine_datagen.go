@@ -111,10 +111,16 @@ func main() {
 				dim := rand.Intn(len(measurements[mIdx].Measurements))
 				measurements[mIdx].Measurements[dim] = getOutlierValue(i)
 			} else {
+				addedOutlier := false
 				for dim := 0; dim < len(measurements[mIdx].Measurements); dim++ {
 					if rand.Intn(2) == 0 {
 						continue
 					}
+					measurements[mIdx].Measurements[dim] = getOutlierValue(i)
+					addedOutlier = true
+				}
+				if !addedOutlier {
+					dim := rand.Intn(len(measurements[mIdx].Measurements))
 					measurements[mIdx].Measurements[dim] = getOutlierValue(i)
 				}
 			}
@@ -152,7 +158,7 @@ func getOutlierValue(idx int) float64 {
 	value := *offset + (*amplitude)*0.5
 	for value >= min && value <= max {
 		isNegative := rand.Intn(2) == 0 && *generateNegativeOutliers
-		value = *maxValue + rand.Float64()*(*outlierDelta)
+		value = rand.Float64() * (*maxValue)
 		if isNegative {
 			value = value * -1
 		}
