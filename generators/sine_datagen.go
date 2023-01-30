@@ -19,8 +19,9 @@ var (
 	divider = flag.Float64("divider", 50, "The index divider for the sine wave")
 
 	maxValue                 = flag.Float64("max", 65.0, "Maximum Value")
-	outlierDelta             = flag.Float64("outlier-delta", 100.0, "Outlier outage")
 	generateNegativeOutliers = flag.Bool("negative-outliers", true, "Generate negative outliers")
+	distortInliers           = flag.Bool("distort-inliers", false, "Add some random value to inliers")
+	distortionMultiplier     = flag.Float64("distortion-multiplier", 5, "The multiplier for the distortion")
 
 	shuffle = flag.Bool("shuffle", false, "Shuffle output randomly")
 
@@ -149,7 +150,11 @@ func main() {
 }
 
 func getSineValue(idx float64) float64 {
-	return *offset + math.Sin(idx)*(*amplitude)
+	distortion := 0.0
+	if *distortInliers {
+		distortion = *distortionMultiplier/2 + rand.Float64()*(*distortionMultiplier)
+	}
+	return *offset + math.Sin(idx)*(*amplitude) + distortion
 }
 
 func getOutlierValue(idx int) float64 {
@@ -158,7 +163,7 @@ func getOutlierValue(idx int) float64 {
 	value := *offset + (*amplitude)*0.5
 	for value >= min && value <= max {
 		isNegative := rand.Intn(2) == 0 && *generateNegativeOutliers
-		value = rand.Float64() * (*maxValue)
+		value = rand.Float64() * (*maxValue * 1.25)
 		if isNegative {
 			value = value * -1
 		}
